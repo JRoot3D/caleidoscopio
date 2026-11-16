@@ -39,6 +39,7 @@ const fragmentShader = /* glsl */ `
 
 function Quad({ texture, params }: { texture: THREE.Texture; params: Params }) {
   const spin = useRef(0)
+  const mat = useRef<THREE.ShaderMaterial>(null)
   const uniforms = useMemo(
     () => ({
       uTex: { value: texture },
@@ -53,20 +54,22 @@ function Quad({ texture, params }: { texture: THREE.Texture; params: Params }) {
   )
 
   useFrame((state, delta) => {
+    if (!mat.current) return
+    const u = mat.current.uniforms // R3F copies the uniforms prop, so write to the material's own object
     if (params.animate) spin.current = (spin.current + delta * 0.3) % (Math.PI * 2)
     const img = texture.image as { width: number; height: number }
-    uniforms.uSegments.value = params.segments
-    uniforms.uRotation.value = THREE.MathUtils.degToRad(params.rotation) + spin.current
-    uniforms.uZoom.value = params.zoom
-    uniforms.uOffset.value.set(params.offsetX, params.offsetY)
-    uniforms.uAspect.value = state.size.width / state.size.height
-    uniforms.uImgAspect.value = img.width / img.height
+    u.uSegments.value = params.segments
+    u.uRotation.value = THREE.MathUtils.degToRad(params.rotation) + spin.current
+    u.uZoom.value = params.zoom
+    u.uOffset.value.set(params.offsetX, params.offsetY)
+    u.uAspect.value = state.size.width / state.size.height
+    u.uImgAspect.value = img.width / img.height
   })
 
   return (
     <mesh frustumCulled={false}>
       <planeGeometry args={[1, 1]} />
-      <shaderMaterial uniforms={uniforms} vertexShader={vertexShader} fragmentShader={fragmentShader} />
+      <shaderMaterial ref={mat} uniforms={uniforms} vertexShader={vertexShader} fragmentShader={fragmentShader} />
     </mesh>
   )
 }
