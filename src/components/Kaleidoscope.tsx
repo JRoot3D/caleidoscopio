@@ -28,10 +28,11 @@ const fragmentShader = /* glsl */ `
   void main() {
     vec2 p = (vUv - 0.5) * vec2(uAspect, 1.0);
     float r = length(p);
-    float a = atan(p.y, p.x) + uRotation;
+    float a = atan(p.y, p.x);
     float w = PI / uSegments;            // segments = mirrored pairs, so odd counts stay seamless
     a = abs(mod(a, 2.0 * w) - w);        // fold every angle into one mirrored wedge
-    vec2 q = r * vec2(cos(a), sin(a)) / uZoom + uOffset;
+    float c = cos(uRotation), s = sin(uRotation);
+    vec2 q = mat2(c, s, -s, c) * (r * vec2(cos(a), sin(a)) / uZoom) + uOffset; // rotate the source, not the pattern
     gl_FragColor = texture2D(uTex, q * vec2(1.0 / uImgAspect, 1.0) + 0.5);
     #include <colorspace_fragment>
   }
