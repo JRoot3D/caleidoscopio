@@ -4,7 +4,7 @@ import { Controls, MobileEditor } from '@/components/Controls'
 import { Kaleidoscope, type Params } from '@/components/Kaleidoscope'
 import { Button } from '@/components/ui/button'
 
-const DEFAULTS: Params = { segments: 3, rotation: 0, resultRotation: 0, offsetX: 0, offsetY: 0, zoom: 1, animate: false, frame: 'square' }
+const DEFAULTS: Params = { segments: 5, rotation: 0, resultRotation: 0, offsetX: 0, offsetY: 0, zoom: 1, animate: false, frame: 'square' }
 
 // checkerboard behind the canvas so the circle frame's transparency is visible
 const CHECKER = { background: 'repeating-conic-gradient(#262626 0 25%, #1c1c1c 0 50%) 0 0 / 24px 24px' }
