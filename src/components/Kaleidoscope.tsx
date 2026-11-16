@@ -61,7 +61,8 @@ function Quad({ texture, params }: { texture: THREE.Texture; params: Params }) {
   useFrame((_, delta) => {
     if (!mat.current) return
     const u = mat.current.uniforms // R3F copies the uniforms prop, so write to the material's own object
-    if (params.animate) spin.current = (spin.current + delta * 0.3) % (Math.PI * 2)
+    // spin lives apart from params.rotation, so dropping it restores the pre-animation view
+    spin.current = params.animate ? (spin.current + delta * 0.3) % (Math.PI * 2) : 0
     const img = texture.image as { width: number; height: number }
     u.uSegments.value = params.segments
     u.uRotation.value = THREE.MathUtils.degToRad(params.rotation) + spin.current
