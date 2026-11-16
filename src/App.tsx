@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Controls } from '@/components/Controls'
 import { Kaleidoscope, type Params } from '@/components/Kaleidoscope'
 
-const DEFAULTS: Params = { segments: 3, rotation: 0, offsetX: 0, offsetY: 0, zoom: 1, animate: false, frame: 'square' }
+const DEFAULTS: Params = { segments: 3, rotation: 0, resultRotation: 0, offsetX: 0, offsetY: 0, zoom: 1, animate: false, frame: 'square' }
 
 export default function App() {
   const [params, setParams] = useState(DEFAULTS)

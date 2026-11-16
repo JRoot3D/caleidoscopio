@@ -5,11 +5,12 @@ import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import type { Params } from './Kaleidoscope'
 
-type NumKey = 'segments' | 'rotation' | 'offsetX' | 'offsetY' | 'zoom'
+type NumKey = 'segments' | 'rotation' | 'resultRotation' | 'offsetX' | 'offsetY' | 'zoom'
 
 const SLIDERS: { key: NumKey; label: string; min: number; max: number; step: number; fmt: (v: number) => string }[] = [
   { key: 'segments', label: 'Segments', min: 3, max: 24, step: 1, fmt: (v) => String(v) },
-  { key: 'rotation', label: 'Rotation', min: 0, max: 360, step: 1, fmt: (v) => `${v}°` },
+  { key: 'rotation', label: 'Source rotation', min: 0, max: 360, step: 1, fmt: (v) => `${v}°` },
+  { key: 'resultRotation', label: 'Result rotation', min: 0, max: 360, step: 1, fmt: (v) => `${v}°` },
   { key: 'offsetX', label: 'Offset X', min: -1, max: 1, step: 0.01, fmt: (v) => v.toFixed(2) },
   { key: 'offsetY', label: 'Offset Y', min: -1, max: 1, step: 0.01, fmt: (v) => v.toFixed(2) },
   { key: 'zoom', label: 'Zoom', min: 0.2, max: 4, step: 0.01, fmt: (v) => `${v.toFixed(2)}×` },

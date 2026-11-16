@@ -4,7 +4,8 @@ import * as THREE from 'three'
 
 export type Params = {
   segments: number
-  rotation: number // degrees
+  rotation: number // degrees, turns the source image
+  resultRotation: number // degrees, turns the finished pattern
   offsetX: number
   offsetY: number
   zoom: number
@@ -23,13 +24,13 @@ const vertexShader = /* glsl */ `
 const fragmentShader = /* glsl */ `
   #define PI 3.141592653589793
   uniform sampler2D uTex;
-  uniform float uSegments, uRotation, uZoom, uImgAspect, uCircle;
+  uniform float uSegments, uRotation, uResultRotation, uZoom, uImgAspect, uCircle;
   uniform vec2 uOffset;
   varying vec2 vUv;
   void main() {
     vec2 p = vUv - 0.5; // canvas is always square
     float r = length(p);
-    float a = atan(p.y, p.x);
+    float a = atan(p.y, p.x) + uResultRotation; // before the fold = turns the whole pattern
     float w = PI / uSegments;            // segments = mirrored pairs, so odd counts stay seamless
     a = abs(mod(a, 2.0 * w) - w);        // fold every angle into one mirrored wedge
     float c = cos(uRotation), s = sin(uRotation);
@@ -48,6 +49,7 @@ function Quad({ texture, params }: { texture: THREE.Texture; params: Params }) {
       uTex: { value: texture },
       uSegments: { value: 3 },
       uRotation: { value: 0 },
+      uResultRotation: { value: 0 },
       uZoom: { value: 1 },
       uCircle: { value: 0 },
       uImgAspect: { value: 1 },
@@ -63,6 +65,7 @@ function Quad({ texture, params }: { texture: THREE.Texture; params: Params }) {
     const img = texture.image as { width: number; height: number }
     u.uSegments.value = params.segments
     u.uRotation.value = THREE.MathUtils.degToRad(params.rotation) + spin.current
+    u.uResultRotation.value = THREE.MathUtils.degToRad(params.resultRotation)
     u.uZoom.value = params.zoom
     u.uOffset.value.set(params.offsetX, params.offsetY)
     u.uCircle.value = params.frame === 'circle' ? 1 : 0
