@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Controls } from '@/components/Controls'
 import { Kaleidoscope, type Params } from '@/components/Kaleidoscope'
 
-const DEFAULTS: Params = { segments: 3, rotation: 0, offsetX: 0, offsetY: 0, zoom: 1, animate: false }
+const DEFAULTS: Params = { segments: 3, rotation: 0, offsetX: 0, offsetY: 0, zoom: 1, animate: false, frame: 'square' }
 
 export default function App() {
   const [params, setParams] = useState(DEFAULTS)
@@ -42,10 +42,12 @@ export default function App() {
       }}
     >
       <main
-        className={`relative min-h-0 flex-1 overflow-hidden rounded-xl border ${dragging ? 'border-primary ring-2 ring-primary/40' : 'border-border'}`}
+        className={`relative grid min-h-0 flex-1 place-items-center overflow-hidden rounded-xl border p-4 [container-type:size] ${dragging ? 'border-primary ring-2 ring-primary/40' : 'border-border'}`}
       >
         {url ? (
-          <Kaleidoscope url={url} params={params} canvasRef={canvasRef} />
+          <div className="size-[min(100cqw,100cqh)]">
+            <Kaleidoscope url={url} params={params} canvasRef={canvasRef} />
+          </div>
         ) : (
           <button
             onClick={() => inputRef.current?.click()}

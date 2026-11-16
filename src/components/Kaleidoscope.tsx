@@ -9,6 +9,7 @@ export type Params = {
   offsetY: number
   zoom: number
   animate: boolean
+  frame: 'square' | 'circle'
 }
 
 const vertexShader = /* glsl */ `
@@ -22,11 +23,11 @@ const vertexShader = /* glsl */ `
 const fragmentShader = /* glsl */ `
   #define PI 3.141592653589793
   uniform sampler2D uTex;
-  uniform float uSegments, uRotation, uZoom, uAspect, uImgAspect;
+  uniform float uSegments, uRotation, uZoom, uImgAspect, uCircle;
   uniform vec2 uOffset;
   varying vec2 vUv;
   void main() {
-    vec2 p = (vUv - 0.5) * vec2(uAspect, 1.0);
+    vec2 p = vUv - 0.5; // canvas is always square
     float r = length(p);
     float a = atan(p.y, p.x);
     float w = PI / uSegments;            // segments = mirrored pairs, so odd counts stay seamless
@@ -34,6 +35,7 @@ const fragmentShader = /* glsl */ `
     float c = cos(uRotation), s = sin(uRotation);
     vec2 q = mat2(c, s, -s, c) * (r * vec2(cos(a), sin(a)) / uZoom) + uOffset; // rotate the source, not the pattern
     gl_FragColor = texture2D(uTex, q * vec2(1.0 / uImgAspect, 1.0) + 0.5);
+    if (uCircle > 0.5) gl_FragColor.a *= 1.0 - smoothstep(0.5 - fwidth(r), 0.5, r); // anti-aliased disc
     #include <colorspace_fragment>
   }
 `
@@ -47,14 +49,14 @@ function Quad({ texture, params }: { texture: THREE.Texture; params: Params }) {
       uSegments: { value: 3 },
       uRotation: { value: 0 },
       uZoom: { value: 1 },
-      uAspect: { value: 1 },
+      uCircle: { value: 0 },
       uImgAspect: { value: 1 },
       uOffset: { value: new THREE.Vector2() },
     }),
     [texture],
   )
 
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (!mat.current) return
     const u = mat.current.uniforms // R3F copies the uniforms prop, so write to the material's own object
     if (params.animate) spin.current = (spin.current + delta * 0.3) % (Math.PI * 2)
@@ -63,14 +65,14 @@ function Quad({ texture, params }: { texture: THREE.Texture; params: Params }) {
     u.uRotation.value = THREE.MathUtils.degToRad(params.rotation) + spin.current
     u.uZoom.value = params.zoom
     u.uOffset.value.set(params.offsetX, params.offsetY)
-    u.uAspect.value = state.size.width / state.size.height
+    u.uCircle.value = params.frame === 'circle' ? 1 : 0
     u.uImgAspect.value = img.width / img.height
   })
 
   return (
     <mesh frustumCulled={false}>
       <planeGeometry args={[1, 1]} />
-      <shaderMaterial ref={mat} uniforms={uniforms} vertexShader={vertexShader} fragmentShader={fragmentShader} />
+      <shaderMaterial ref={mat} transparent uniforms={uniforms} vertexShader={vertexShader} fragmentShader={fragmentShader} />
     </mesh>
   )
 }

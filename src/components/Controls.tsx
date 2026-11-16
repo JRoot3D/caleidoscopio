@@ -61,6 +61,25 @@ export function Controls({
         ))}
 
         <div className="flex items-center justify-between">
+          <Label>Frame</Label>
+          <div className="flex gap-1" role="radiogroup" aria-label="Frame">
+            {(['square', 'circle'] as const).map((frame) => (
+              <Button
+                key={frame}
+                size="sm"
+                role="radio"
+                aria-checked={params.frame === frame}
+                variant={params.frame === frame ? 'default' : 'outline'}
+                onClick={() => onChange({ frame })}
+                className="capitalize"
+              >
+                {frame}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between">
           <Label htmlFor="animate">Animate</Label>
           <Switch id="animate" checked={params.animate} onCheckedChange={(animate) => onChange({ animate })} />
         </div>
