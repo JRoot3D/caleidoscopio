@@ -1,10 +1,13 @@
-import { Download, ImagePlus } from 'lucide-react'
+import { Download, ImagePlus, RotateCcw } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { Controls } from '@/components/Controls'
+import { Controls, MobileEditor } from '@/components/Controls'
 import { Kaleidoscope, type Params } from '@/components/Kaleidoscope'
 import { Button } from '@/components/ui/button'
 
 const DEFAULTS: Params = { segments: 3, rotation: 0, resultRotation: 0, offsetX: 0, offsetY: 0, zoom: 1, animate: false, frame: 'square' }
+
+// checkerboard behind the canvas so the circle frame's transparency is visible
+const CHECKER = { background: 'repeating-conic-gradient(#262626 0 25%, #1c1c1c 0 50%) 0 0 / 24px 24px' }
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
 const wrap360 = (v: number) => ((v % 360) + 360) % 360
@@ -29,6 +32,7 @@ export default function App() {
 
   const update = (p: Partial<Params>) => setParams((prev) => ({ ...prev, ...p }))
   const pick = () => inputRef.current?.click()
+  const reset = () => update({ ...DEFAULTS, segments: params.segments, frame: params.frame, animate: params.animate })
 
   const loadFile = (file?: File) => {
     if (file?.type.startsWith('image/')) setUrl(URL.createObjectURL(file))
@@ -98,6 +102,9 @@ export default function App() {
       <header className="flex h-14 shrink-0 items-center justify-between border-b px-4">
         <h1 className="font-heading text-base font-semibold">Kaleidoscope</h1>
         <div className="flex gap-2">
+          <Button variant="ghost" className="h-10 md:h-8" onClick={reset} disabled={!url} aria-label="Reset position and rotation">
+            <RotateCcw /> <span className="max-md:sr-only">Reset</span>
+          </Button>
           <Button variant="outline" className="h-10 md:h-8" onClick={pick}>
             <ImagePlus /> <span className="max-sm:sr-only">Choose image</span>
           </Button>
@@ -109,7 +116,8 @@ export default function App() {
 
       <div className="flex min-h-0 flex-1 flex-col md:flex-row">
         <main
-          className={`relative grid min-h-0 flex-1 place-items-center p-3 [container-type:size] md:p-6 ${dragging ? 'bg-primary/5 ring-2 ring-primary/40 ring-inset' : ''}`}
+          className={`relative grid min-h-0 flex-1 place-items-center p-3 [container-type:size] md:p-6 ${dragging ? 'ring-2 ring-primary/40 ring-inset' : ''}`}
+          style={CHECKER}
         >
           {url ? (
             <div
@@ -141,9 +149,13 @@ export default function App() {
           )}
         </main>
 
-        <aside className="shrink-0 border-t bg-card px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] md:w-80 md:overflow-y-auto md:border-t-0 md:border-l md:pt-4">
-          <Controls params={params} onChange={update} onReset={() => update({ ...DEFAULTS, segments: params.segments, frame: params.frame, animate: params.animate })} />
+        <aside className="hidden w-80 shrink-0 overflow-y-auto border-l bg-card p-4 md:block">
+          <Controls params={params} onChange={update} />
         </aside>
+
+        <div className="shrink-0 rounded-t-2xl bg-card px-4 pt-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:hidden">
+          <MobileEditor params={params} onChange={update} />
+        </div>
       </div>
 
       <input
